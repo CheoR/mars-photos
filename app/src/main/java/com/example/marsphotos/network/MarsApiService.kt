@@ -13,7 +13,7 @@ private val retrofit = Retrofit.Builder()
 
 interface MarsApiService {
     @GET("photos") // get request to /photos endpoint
-    fun getPhotos(): String
+    suspend fun getPhotos(): String
 
 }
 
@@ -27,4 +27,3 @@ object MarsApi {
         retrofit.create(MarsApiService::class.java)
     }
 }
-
