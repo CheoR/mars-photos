@@ -4,8 +4,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
 import androidx.lifecycle.viewModelScope
-import com.example.marsphotos.data.NetworkMarsPhotosRepository
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
+import com.example.marsphotos.MarsPhotosApplication
+import com.example.marsphotos.data.MarsPhotosRepository
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
 import java.io.IOException
@@ -17,7 +22,9 @@ sealed interface MarsUiState {
 }
 
 
-class MarsViewModel : ViewModel() {
+class MarsViewModel(
+    private val marsPhotosRepository: MarsPhotosRepository
+) : ViewModel() {
     /** The mutable State that stores the status of the most recent request */
     var marsUiState: MarsUiState by mutableStateOf(MarsUiState.Loading)
         private set
@@ -36,7 +43,6 @@ class MarsViewModel : ViewModel() {
     private fun getMarsPhotos() {
         viewModelScope.launch {
             marsUiState = try {
-                val marsPhotosRepository = NetworkMarsPhotosRepository()
                 val listResult = marsPhotosRepository.getMarsPhotos()
                 MarsUiState.Success(
                     "Success: ${listResult.size} Mars photos retrieved"
@@ -48,4 +54,24 @@ class MarsViewModel : ViewModel() {
             }
         }
     }
+
+    /**
+     * A companion object helps us by having a single instance of an object that is used by everyone
+     * without needing to create a new instance of an expensive object. This is an implementation
+     * detail, and separating it lets us make changes without impacting other parts of the app's code.
+     *
+     * The APPLICATION_KEY is part of the ViewModelProvider.AndroidViewModelFactory.Companion object
+     * and is used to find the app's MarsPhotosApplication object, which has the container property
+     * used to retrieve the repository used for dependency injection.
+     */
+    companion object {
+        val Factory: ViewModelProvider.Factory = viewModelFactory {
+            initializer {
+                val application = (this[APPLICATION_KEY] as MarsPhotosApplication)
+                val marsPhotosRepository = application.container.marsPhotosRepository
+                MarsViewModel(marsPhotosRepository = marsPhotosRepository)
+            }
+        }
+    }
+
 }
