@@ -26,7 +26,10 @@ import com.example.marsphotos.ui.theme.MarsPhotosTheme
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 
 @Composable
 fun HomeScreen(
@@ -80,17 +83,22 @@ fun ResultScreen(photos: String, modifier: Modifier = Modifier) {
 
 @Composable
 fun MarsPhotoCard(photo: MarsPhoto, modifier: Modifier = Modifier) {
-    AsyncImage(
-        model = ImageRequest.Builder(context = LocalContext.current)
-            .data(photo.imgSrc)
-            .crossfade(true)
-            .build(),
-        contentDescription = stringResource(R.string.mars_photo),
-        contentScale = ContentScale.Crop,
-        error = painterResource(R.drawable.ic_broken_image),
-        placeholder = painterResource(R.drawable.loading_img),
-        modifier = Modifier.fillMaxWidth()
-    )
+    Card(
+        modifier = modifier,
+        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+    ) {
+        AsyncImage(
+            model = ImageRequest.Builder(context = LocalContext.current)
+                .data(photo.imgSrc)
+                .crossfade(true)
+                .build(),
+            contentDescription = stringResource(R.string.mars_photo),
+            contentScale = ContentScale.Crop,
+            error = painterResource(R.drawable.ic_broken_image),
+            placeholder = painterResource(R.drawable.loading_img),
+            modifier = Modifier.fillMaxWidth()
+        )
+    }
 }
 
 @Composable
@@ -100,18 +108,26 @@ fun PhotosGridScreen(photos: List<MarsPhoto>, modifier: Modifier = Modifier) {
         modifier = modifier.fillMaxWidth(),
         contentPadding = PaddingValues(4.dp)
     ) {
-        items(items = photos, key = { photo -> photo.id }) {
-                photo -> MarsPhotoCard(photo)
+        items(items = photos, key = { photo -> photo.id }) {photo ->
+            MarsPhotoCard(
+                photo,
+                modifier = modifier
+                    .padding(4.dp)
+                    .fillMaxWidth()
+                    .aspectRatio(1.5f)
+            )
         }
+
     }
 }
 
 
 @Preview(showBackground = true)
 @Composable
-fun ResultScreenPreview() {
+fun PhotosGridScreenPreview() {
     MarsPhotosTheme {
-        ResultScreen(stringResource(R.string.placeholder_result))
+        val mockData = List(10) { MarsPhoto("$it", "") }
+        PhotosGridScreen(mockData)
     }
 }
 
