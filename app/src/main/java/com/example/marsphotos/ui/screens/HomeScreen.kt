@@ -23,6 +23,10 @@ import coil.request.ImageRequest
 import com.example.marsphotos.R
 import com.example.marsphotos.model.MarsPhoto
 import com.example.marsphotos.ui.theme.MarsPhotosTheme
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.lazy.grid.items
 
 @Composable
 fun HomeScreen(
@@ -31,11 +35,7 @@ fun HomeScreen(
 ) {
     when (marsUiState) {
         is MarsUiState.Loading -> LoadingScreen(modifier = modifier.fillMaxSize())
-        is MarsUiState.Success -> MarsPhotoCard(
-            photo = marsUiState.photos,
-            modifier = modifier
-        )
-
+        is MarsUiState.Success -> PhotosGridScreen(marsUiState.photos, modifier)
         is MarsUiState.Error -> ErrorScreen( modifier = modifier.fillMaxSize())
     }
 }
@@ -92,6 +92,20 @@ fun MarsPhotoCard(photo: MarsPhoto, modifier: Modifier = Modifier) {
         modifier = Modifier.fillMaxWidth()
     )
 }
+
+@Composable
+fun PhotosGridScreen(photos: List<MarsPhoto>, modifier: Modifier = Modifier) {
+    LazyVerticalGrid(
+        columns = GridCells.Adaptive(150.dp),
+        modifier = modifier.fillMaxWidth(),
+        contentPadding = PaddingValues(4.dp)
+    ) {
+        items(items = photos, key = { photo -> photo.id }) {
+                photo -> MarsPhotoCard(photo)
+        }
+    }
+}
+
 
 @Preview(showBackground = true)
 @Composable
